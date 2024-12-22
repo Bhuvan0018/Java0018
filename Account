@@ -1,0 +1,233 @@
+import java.util.*;
+
+class Account {
+    private String accountNumber;
+    private String accountHolder;
+    private double balance;
+
+    public Account(String accountNumber, String accountHolder, double balance) {
+        this.accountNumber = accountNumber;
+        this.accountHolder = accountHolder;
+        this.balance = balance;
+    }
+
+    public String getAccountNumber() {
+        return accountNumber;
+    }
+
+    public String getAccountHolder() {
+        return accountHolder;
+    }
+
+    public double getBalance() {
+        return balance;
+    }
+
+    public void deposit(double amount) {
+        if (amount > 0) {
+            balance += amount;
+            System.out.println("Deposited " + amount + " to account " + accountNumber);
+        } else {
+            System.out.println("Amount should be greater than 0.");
+        }
+    }
+
+    public void withdraw(double amount) {
+        if (amount > 0 && amount <= balance) {
+            balance -= amount;
+            System.out.println("Withdrew " + amount + " from account " + accountNumber);
+        } else {
+            System.out.println("Insufficient funds or invalid amount.");
+        }
+    }
+
+    public void transfer(Account toAccount, double amount) {
+        if (amount > 0 && amount <= balance) {
+            this.withdraw(amount);
+            toAccount.deposit(amount);
+            System.out.println("Transferred " + amount + " from account " + accountNumber + " to " + toAccount.getAccountNumber());
+        } else {
+            System.out.println("Insufficient funds or invalid amount.");
+        }
+    }
+
+    public void displayAccountInfo() {
+        System.out.println("Account Number: " + accountNumber);
+        System.out.println("Account Holder: " + accountHolder);
+        System.out.println("Account Balance: " + balance);
+    }
+}
+
+class Bank {
+    private Map<String, Account> accounts;
+
+    public Bank() {
+        accounts = new HashMap<>();
+    }
+
+    public void addAccount(Account account) {
+        if (!accounts.containsKey(account.getAccountNumber())) {
+            accounts.put(account.getAccountNumber(), account);
+            System.out.println("Account added for " + account.getAccountHolder());
+        } else {
+            System.out.println("Account already exists with this account number.");
+        }
+    }
+
+    public Account getAccount(String accountNumber) {
+        return accounts.get(accountNumber);
+    }
+
+    public void removeAccount(String accountNumber) {
+        if (accounts.containsKey(accountNumber)) {
+            accounts.remove(accountNumber);
+            System.out.println("Account removed with account number " + accountNumber);
+        } else {
+            System.out.println("Account not found with the given account number.");
+        }
+    }
+
+    public void showAllAccounts() {
+        if (accounts.isEmpty()) {
+            System.out.println("No accounts available.");
+        } else {
+            System.out.println("All accounts in the bank:");
+            for (Account account : accounts.values()) {
+                account.displayAccountInfo();
+                System.out.println();
+            }
+        }
+    }
+
+    public void showAccountInfo(String accountNumber) {
+        Account account = getAccount(accountNumber);
+        if (account != null) {
+            account.displayAccountInfo();
+        } else {
+            System.out.println("Account not found with the given account number.");
+        }
+    }
+}
+
+class Customer {
+    private String name;
+    private String customerId;
+    private String phoneNumber;
+
+    public Customer(String name, String customerId, String phoneNumber) {
+        this.name = name;
+        this.customerId = customerId;
+        this.phoneNumber = phoneNumber;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getCustomerId() {
+        return customerId;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void displayCustomerInfo() {
+        System.out.println("Customer ID: " + customerId);
+        System.out.println("Customer Name: " + name);
+        System.out.println("Customer Phone: " + phoneNumber);
+    }
+}
+
+class BankSystem {
+    private Bank bank;
+
+    public BankSystem() {
+        bank = new Bank();
+    }
+
+    public void addAccount(String accountNumber, String accountHolder, double initialDeposit) {
+        Account account = new Account(accountNumber, accountHolder, initialDeposit);
+        bank.addAccount(account);
+    }
+
+    public void removeAccount(String accountNumber) {
+        bank.removeAccount(accountNumber);
+    }
+
+    public void depositToAccount(String accountNumber, double amount) {
+        Account account = bank.getAccount(accountNumber);
+        if (account != null) {
+            account.deposit(amount);
+        } else {
+            System.out.println("Account not found.");
+        }
+    }
+
+    public void withdrawFromAccount(String accountNumber, double amount) {
+        Account account = bank.getAccount(accountNumber);
+        if (account != null) {
+            account.withdraw(amount);
+        } else {
+            System.out.println("Account not found.");
+        }
+    }
+
+    public void transferBetweenAccounts(String fromAccountNumber, String toAccountNumber, double amount) {
+        Account fromAccount = bank.getAccount(fromAccountNumber);
+        Account toAccount = bank.getAccount(toAccountNumber);
+
+        if (fromAccount != null && toAccount != null) {
+            fromAccount.transfer(toAccount, amount);
+        } else {
+            System.out.println("One or both accounts not found.");
+        }
+    }
+
+    public void showAccountInfo(String accountNumber) {
+        bank.showAccountInfo(accountNumber);
+    }
+
+    public void showAllAccounts() {
+        bank.showAllAccounts();
+    }
+
+    public void addCustomer(String name, String customerId, String phoneNumber) {
+        Customer customer = new Customer(name, customerId, phoneNumber);
+        customer.displayCustomerInfo();
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        BankSystem bankSystem = new BankSystem();
+
+        // Create and add customers
+        bankSystem.addCustomer("John Doe", "C001", "1234567890");
+        bankSystem.addCustomer("Jane Smith", "C002", "9876543210");
+
+        // Create accounts and add them to the bank system
+        bankSystem.addAccount("A001", "John Doe", 1000.0);
+        bankSystem.addAccount("A002", "Jane Smith", 1500.0);
+
+        // Show all accounts in the bank
+        bankSystem.showAllAccounts();
+
+        // Perform transactions
+        bankSystem.depositToAccount("A001", 500.0);
+        bankSystem.withdrawFromAccount("A002", 300.0);
+
+        // Transfer between accounts
+        bankSystem.transferBetweenAccounts("A001", "A002", 200.0);
+
+        // Show account information after transactions
+        bankSystem.showAccountInfo("A001");
+        bankSystem.showAccountInfo("A002");
+
+        // Remove an account
+        bankSystem.removeAccount("A001");
+
+        // Show remaining accounts in the bank
+        bankSystem.showAllAccounts();
+    }
+}
